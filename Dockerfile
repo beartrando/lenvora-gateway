@@ -27,7 +27,7 @@ RUN apt-get update \
         wget \
     && rm -rf /var/lib/apt/lists/*
 
-RUN corepack enable && corepack prepare pnpm@11.28.4 --activate
+RUN corepack enable && corepack prepare pnpm@11.9.0 --activate
 
 
 # ---------- DEPS ----------
@@ -39,6 +39,8 @@ RUN pnpm install --offline --frozen-lockfile
 RUN mkdir -p ./services/gateway/src/contracts/proto
 RUN pnpm --filter gateway proto:generate
 
+RUN mkdir -p ./shared/errors/src/contracts/proto
+RUN pnpm --filter @shared/errors proto:generate
 
 #RUN pnpm --filter gateway prisma:generate
 
@@ -66,10 +68,12 @@ FROM deps AS build
 
 ENV NODE_ENV=production
 
-
 RUN pnpm --filter @shared/logger build
 RUN pnpm --filter @shared/grpc-client-manager build
 RUN pnpm --filter @shared/errors build
+#RUN pnpm --filter @shared/kafka-manager build
+#RUN pnpm --filter @shared/pg-boss-manager build
+
 RUN pnpm --filter gateway build
 
 RUN pnpm --filter gateway deploy /deploy --prod
